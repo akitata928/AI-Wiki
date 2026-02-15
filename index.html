@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 變革 Wiki — 結構化知識庫</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a1a;
+  --paper: #f6f3ee;
+  --accent: #c23616;
+  --accent-light: #e8d5cf;
+  --accent-dark: #8b1a0e;
+  --sidebar-bg: #1e1e1e;
+  --sidebar-text: #c8c4bc;
+  --sidebar-hover: #f6f3ee;
+  --tag-bg: #e8e4dc;
+  --tag-text: #5a5650;
+  --border: #d6d0c6;
+  --highlight: #fff3cd;
+  --link: #9e3a1a;
+  --code-bg: #2d2d2d;
+  --card-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --serif: 'Noto Serif TC', 'Georgia', serif;
+  --sans: 'Noto Sans TC', 'Helvetica Neue', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.8;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 300px;
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sidebar-header h1 {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+
+.sidebar-header .subtitle {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.35);
+  font-weight: 500;
+}
+
+.nav-section {
+  padding: 16px 0 8px;
+}
+
+.nav-section-title {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(255,255,255,0.28);
+  padding: 0 24px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 24px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--sidebar-hover);
+}
+
+.nav-item.active {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border-left-color: var(--accent);
+  font-weight: 500;
+}
+
+.nav-item .nav-icon {
+  width: 18px;
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.nav-item .nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 24px 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.2);
+  line-height: 1.6;
+}
+
+/* ── Main ── */
+.main {
+  margin-left: 300px;
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(246,243,238,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.breadcrumb {
+  font-size: 0.78rem;
+  color: var(--tag-text);
+}
+
+.breadcrumb span { color: var(--accent); font-weight: 600; }
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  color: var(--tag-text);
+  cursor: text;
+  min-width: 200px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--ink);
+  width: 100%;
+}
+
+.content-area {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 48px 80px;
+}
+
+/* ── Article Page ── */
+.page { display: none; }
+.page.active { display: block; }
+
+.page-header {
+  margin-bottom: 36px;
+  padding-bottom: 28px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.page-header .page-category {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.page-header h2 {
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.page-header .page-desc {
+  font-size: 1rem;
+  color: var(--tag-text);
+  line-height: 1.7;
+  max-width: 640px;
+}
+
+.meta-bar {
+  display: flex;
+  gap: 20px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.meta-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* ── Content Blocks ── */
+.section-block {
+  margin-bottom: 36px;
+}
+
+.section-block h3 {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-block h4 {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 20px 0 10px;
+}
+
+.section-block p {
+  margin-bottom: 14px;
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: #333;
+}
+
+.section-block p:last-child { margin-bottom: 0; }
+
+/* ── Callout ── */
+.callout {
+  background: #fff;
+  border-left: 4px solid var(--accent);
+  padding: 18px 22px;
+  margin: 20px 0;
+  border-radius: 0 8px 8px 0;
+  box-shadow: var(--card-shadow);
+}
+
+.callout.warning {
+  border-left-color: #e67e22;
+  background: #fffcf5;
+}
+
+.callout.info {
+  border-left-color: #2980b9;
+  background: #f5f9ff;
+}
+
+.callout.success {
+  border-left-color: #27ae60;
+  background: #f5fff9;
+}
+
+.callout .callout-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.callout p {
+  font-size: 0.88rem !important;
+  line-height: 1.7 !important;
+  margin-bottom: 0 !important;
+}
+
+/* ── Timeline ── */
+.timeline {
+  position: relative;
+  padding-left: 28px;
+  margin: 20px 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent), var(--border));
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 18px;
+  padding-bottom: 4px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -26px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--paper);
+}
+
+.timeline-item.future::before {
+  background: var(--paper);
+  border: 2px solid var(--accent);
+}
+
+.timeline-year {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.timeline-desc {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.65;
+}
+
+/* ── Cross-links ── */
+.wiki-link {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--link);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.wiki-link:hover {
+  color: var(--accent-dark);
+  border-bottom-style: solid;
+}
+
+/* ── Related / See Also ── */
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  margin: 16px 0;
+}
+
+.related-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.related-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(194,54,22,0.08);
+  transform: translateY(-1px);
+}
+
+.related-card .rc-icon {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.related-card .rc-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+
+.related-card .rc-desc {
+  font-size: 0.75rem;
+  color: var(--tag-text);
+  line-height: 1.5;
+}
+
+/* ── Data Table ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.88rem;
+}
+
+.data-table th {
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tag-text);
+  border-bottom: 2px solid var(--ink);
+  padding: 8px 12px;
+  font-weight: 700;
+}
+
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.data-table tr:hover td {
+  background: rgba(0,0,0,0.015);
+}
+
+/* ── Impact Meter ── */
+.impact-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.impact-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  flex: 1;
+  max-width: 120px;
+  overflow: hidden;
+}
+
+.impact-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  transition: width 0.6s ease;
+}
+
+.impact-label {
+  font-size: 0.72rem;
+  color: var(--tag-text);
+  font-weight: 500;
+  min-width: 28px;
+}
+
+/* ── Hamburger ── */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  background: var(--sidebar-bg);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .topbar { padding: 12px 20px 12px 60px; }
+  .content-area { padding: 28px 20px 60px; }
+  .hamburger { display: flex; }
+  .page-header h2 { font-size: 1.6rem; }
+}
+
+/* ── Overlay ── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 90;
+}
+
+.overlay.active { display: block; }
+</style>
+</head>
+<body>
+
+<button class="hamburger" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- ════ SIDEBAR ════ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1>AI 變革 Wiki</h1>
+    <div class="subtitle">Structured Knowledge Base</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">總覽</div>
+    <a class="nav-item active" data-page="overview" onclick="goTo('overview')">
+      <span class="nav-icon">◉</span><span class="nav-label">核心論述總覽</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">關鍵概念</div>
+    <a class="nav-item" data-page="capability-timeline" onclick="goTo('capability-timeline')">
+      <span class="nav-icon">⏱</span><span class="nav-label">AI 能力演進時間軸</span>
+    </a>
+    <a class="nav-item" data-page="intelligence-explosion" onclick="goTo('intelligence-explosion')">
+      <span class="nav-icon">⚡</span><span class="nav-label">智慧爆炸與遞歸自改進</span>
+    </a>
+    <a class="nav-item" data-page="metr-benchmark" onclick="goTo('metr-benchmark')">
+      <span class="nav-icon">📊</span><span class="nav-label">METR 基準測試</span>
+    </a>
+    <a class="nav-item" data-page="models-feb2026" onclick="goTo('models-feb2026')">
+      <span class="nav-icon">🧠</span><span class="nav-label">2026.2.5 雙模型發布事件</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">衝擊分析</div>
+    <a class="nav-item" data-page="job-displacement" onclick="goTo('job-displacement')">
+      <span class="nav-icon">💼</span><span class="nav-label">職業衝擊全景</span>
+    </a>
+    <a class="nav-item" data-page="cognitive-labor" onclick="goTo('cognitive-labor')">
+      <span class="nav-icon">🔄</span><span class="nav-label">認知勞動的通用替代</span>
+    </a>
+    <a class="nav-item" data-page="perception-gap" onclick="goTo('perception-gap')">
+      <span class="nav-icon">👁</span><span class="nav-label">公眾認知落差</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">策略與行動</div>
+    <a class="nav-item" data-page="action-playbook" onclick="goTo('action-playbook')">
+      <span class="nav-icon">🎯</span><span class="nav-label">個人行動手冊</span>
+    </a>
+    <a class="nav-item" data-page="financial-resilience" onclick="goTo('financial-resilience')">
+      <span class="nav-icon">🛡</span><span class="nav-label">財務韌性策略</span>
+    </a>
+    <a class="nav-item" data-page="next-gen-education" onclick="goTo('next-gen-education')">
+      <span class="nav-icon">📚</span><span class="nav-label">下一代教育思維</span>
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">宏觀視角</div>
+    <a class="nav-item" data-page="existential-stakes" onclick="goTo('existential-stakes')">
+      <span class="nav-icon">🌍</span><span class="nav-label">文明級風險與機遇</span>
+    </a>
+    <a class="nav-item" data-page="key-figures" onclick="goTo('key-figures')">
+      <span class="nav-icon">👤</span><span class="nav-label">關鍵人物與機構</span>
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    原文作者：Matt Shumer<br>
+    結構化整理：AI Wiki 研究項目<br>
+    資料基準日：2026 年 2 月
+  </div>
+</nav>
+
+<!-- ════ MAIN ════ -->
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">AI 變革 Wiki ／ <span id="breadcrumb-page">核心論述總覽</span></div>
+    <div class="search-box">
+      🔍 <input type="text" placeholder="搜尋條目…" id="searchInput" oninput="filterNav(this.value)">
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: OVERVIEW -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page active" id="page-overview">
+      <div class="page-header">
+        <div class="page-category">總覽</div>
+        <h2>核心論述總覽</h2>
+        <p class="page-desc">一位 AI 創業者對業內人士「已經經歷、業外人士即將經歷」之變革的完整警示與行動框架。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">📖 原文作者：Matt Shumer</span>
+          <span class="meta-tag">📅 2026 年 2 月</span>
+          <span class="meta-tag">🏷 警示文 / 行動指南</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>文章核心比喻</h3>
+        <p>作者以 <strong>2020 年 2 月的 COVID-19 疫情前夕</strong>作為框架比喻：當時多數人尚未意識到世界即將在三週內徹底改變。作者主張，我們現在正處於一場比疫情「更重大、影響更深遠」事件的「這看起來言過其實」階段——而這次的事件是 AI。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>五大論點結構</h3>
+
+        <div class="callout">
+          <div class="callout-title">① 親身見證</div>
+          <p>作者自述作為 AI 創業者，其工作已被 AI 實質取代。2026 年 2 月 5 日的<a class="wiki-link" onclick="goTo('models-feb2026')">雙模型發布</a>是轉折點：AI 不再需要人類迭代指導，能自主完成從構思到測試的全流程。</p>
+        </div>
+
+        <div class="callout info">
+          <div class="callout-title">② 速度超出直覺</div>
+          <p><a class="wiki-link" onclick="goTo('capability-timeline')">能力演進時間軸</a>顯示從「不會算術」到「取代資深工程師」僅花了四年。<a class="wiki-link" onclick="goTo('metr-benchmark')">METR 基準</a>顯示自主任務時長每 4-7 個月翻倍。</p>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-title">③ 遞歸自我改進已啟動</div>
+          <p>GPT-5.3 Codex 在技術文件中明確宣告「首次在自身創建過程中發揮關鍵作用」。這正是<a class="wiki-link" onclick="goTo('intelligence-explosion')">智慧爆炸</a>假說的實現起點。</p>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">④ 認知勞動的全面替代</div>
+          <p>與歷史上替代特定技能的自動化不同，AI 是<a class="wiki-link" onclick="goTo('cognitive-labor')">認知勞動的通用替代品</a>——它在所有知識領域同時變強，不留下傳統的「轉型缺口」。</p>
+        </div>
+
+        <div class="callout success">
+          <div class="callout-title">⑤ 窗口期行動指南</div>
+          <p>作者提出一系列<a class="wiki-link" onclick="goTo('action-playbook')">個人行動策略</a>，核心觀點是：現在存在一個短暫窗口，多數人仍在忽視，先行者可建立顯著優勢。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('capability-timeline')">
+            <div class="rc-icon">⏱</div>
+            <div class="rc-title">AI 能力演進時間軸</div>
+            <div class="rc-desc">從 2022 到 2026，四年內的能力躍遷全記錄</div>
+          </a>
+          <a class="related-card" onclick="goTo('intelligence-explosion')">
+            <div class="rc-icon">⚡</div>
+            <div class="rc-title">智慧爆炸與遞歸自改進</div>
+            <div class="rc-desc">AI 建造 AI 的正反饋循環如何加速進步</div>
+          </a>
+          <a class="related-card" onclick="goTo('job-displacement')">
+            <div class="rc-icon">💼</div>
+            <div class="rc-title">職業衝擊全景</div>
+            <div class="rc-desc">法律、金融、醫療、工程等領域的衝擊分析</div>
+          </a>
+          <a class="related-card" onclick="goTo('existential-stakes')">
+            <div class="rc-icon">🌍</div>
+            <div class="rc-title">文明級風險與機遇</div>
+            <div class="rc-desc">Amodei 的「新國家」思維實驗與雙面性</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: CAPABILITY TIMELINE -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-capability-timeline">
+      <div class="page-header">
+        <div class="page-category">關鍵概念</div>
+        <h2>AI 能力演進時間軸</h2>
+        <p class="page-desc">從無法做基本算術到取代資深工程師——四年內的指數級跨越。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">🏷 歷史記錄</span>
+          <span class="meta-tag">🔗 METR 基準</span>
+          <span class="meta-tag">🔗 2026.2.5 事件</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>能力里程碑</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-year">2022</div>
+            <div class="timeline-desc">AI 連基本算術都做不好，會自信地說 7×8＝54。語言模型初具對話能力，但可靠性極低。</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2023</div>
+            <div class="timeline-desc">通過律師資格考試。GPT-4 發布，展現跨領域的推理能力，但仍有顯著的「幻覺」問題。</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2024</div>
+            <div class="timeline-desc">能編寫可運行軟體，解釋研究所程度科學。新訓練技術解鎖更快進步速度，且速度持續加快。</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2025 年底</div>
+            <div class="timeline-desc">世界頂尖工程師表示已將大部分編碼工作交給 AI。METR 測量顯示 AI 可獨立完成人類專家需 5 小時的任務。</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2026 年 2 月 5 日 ★</div>
+            <div class="timeline-desc"><a class="wiki-link" onclick="goTo('models-feb2026')">GPT-5.3 Codex + Opus 4.6 同日發布</a>。作者稱之為「讓之前一切看起來都像上個世紀」的轉折。AI 展現出「判斷力」與「品味」——首次具備難以言喻的對錯直覺。</div>
+          </div>
+          <div class="timeline-item future">
+            <div class="timeline-year">2026-2027（預測）</div>
+            <div class="timeline-desc">Amodei 預測 AI 將在「幾乎所有任務上明顯比幾乎所有人類都聰明」。METR 趨勢推估 AI 可獨立工作數日至數週。</div>
+          </div>
+          <div class="timeline-item future">
+            <div class="timeline-year">2028-2029（預測）</div>
+            <div class="timeline-desc">趨勢外推：AI 可處理為期一個月的複雜專案。大規模職業替代進入全面展開階段。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>關鍵觀察</h3>
+        <p>作者強調：每個新模型不僅比上一個更好，<strong>領先幅度更大</strong>，且新模型發布的<strong>時間間隔更短</strong>。這不是線性進步，而是加速中的指數曲線。</p>
+        <div class="callout info">
+          <div class="callout-title">📐 指數 vs 線性思維</div>
+          <p>作者的經驗法則：「如果一個模型今天顯露出一丁點能力，下一代就會真正精通。」人類直覺傾向線性外推，但 AI 能力呈指數級演化——這是<a class="wiki-link" onclick="goTo('perception-gap')">公眾認知落差</a>的根本原因。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('metr-benchmark')">
+            <div class="rc-icon">📊</div>
+            <div class="rc-title">METR 基準測試</div>
+            <div class="rc-desc">量化自主任務能力的唯一可靠指標</div>
+          </a>
+          <a class="related-card" onclick="goTo('models-feb2026')">
+            <div class="rc-icon">🧠</div>
+            <div class="rc-title">2026.2.5 雙模型發布</div>
+            <div class="rc-desc">GPT-5.3 Codex 與 Opus 4.6 的技術意義</div>
+          </a>
+          <a class="related-card" onclick="goTo('intelligence-explosion')">
+            <div class="rc-icon">⚡</div>
+            <div class="rc-title">智慧爆炸</div>
+            <div class="rc-desc">加速的底層機制：AI 建造 AI</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: INTELLIGENCE EXPLOSION -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-intelligence-explosion">
+      <div class="page-header">
+        <div class="page-category">關鍵概念</div>
+        <h2>智慧爆炸與遞歸自改進</h2>
+        <p class="page-desc">當 AI 足夠聰明到能改進自身時，進步速度不再受限於人類研究員的速度。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">🏷 核心機制</span>
+          <span class="meta-tag">⚠️ 高風險議題</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>遞歸循環機制</h3>
+        <p>AI 實驗室做出了一個刻意的策略選擇：<strong>先讓 AI 精通編寫程式碼</strong>。原因在於建構 AI 需要大量程式碼。如果 AI 會寫程式碼，它就能幫助開發下一個版本的自己——一個更聰明的版本，能寫出更好的程式碼，進而開發出更聰明的版本。</p>
+
+        <div class="callout warning">
+          <div class="callout-title">⚠️ OpenAI 的官方聲明</div>
+          <p>GPT-5.3 Codex 技術文件明確指出：「GPT-5.3-Codex 是我們首個在自身創建過程中發揮關鍵作用的模型。Codex 團隊使用了早期版本來除錯其自身的訓練、管理其自身的部署，並診斷測試結果與評估。」——這是遞歸自改進從理論走向現實的里程碑。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>Anthropic CEO 的時間表</h3>
+        <p>Dario Amodei 的三項關鍵聲明：</p>
+        <table class="data-table">
+          <thead><tr><th>聲明</th><th>時間估計</th><th>意涵</th></tr></thead>
+          <tbody>
+            <tr><td>AI 正在 Anthropic 編寫「大部分程式碼」</td><td>現在</td><td>反饋循環已在運作</td></tr>
+            <tr><td>反饋循環「逐月加強」</td><td>持續中</td><td>加速度本身在加速</td></tr>
+            <tr><td>AI 自主建構下一代 AI 的臨界點</td><td>1-2 年內</td><td>人類可能退出核心開發迴路</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h3>為什麼這很重要</h3>
+        <p>一旦 AI 能夠自主建構更聰明的下一代，進步速度將不再受限於人類研究員的工作節奏（睡眠、假期、認知瓶頸）。研究人員稱這個理論轉折點為<strong>「智慧爆炸」（Intelligence Explosion）</strong>。</p>
+        <p>作者的判斷：那些最了解內情的人——也就是親手建造 AI 的人——相信這個過程<strong>已經開始了</strong>。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('models-feb2026')">
+            <div class="rc-icon">🧠</div>
+            <div class="rc-title">2026.2.5 雙模型發布</div>
+            <div class="rc-desc">自改進里程碑的具體證據</div>
+          </a>
+          <a class="related-card" onclick="goTo('existential-stakes')">
+            <div class="rc-icon">🌍</div>
+            <div class="rc-title">文明級風險與機遇</div>
+            <div class="rc-desc">智慧爆炸的雙面性討論</div>
+          </a>
+          <a class="related-card" onclick="goTo('key-figures')">
+            <div class="rc-icon">👤</div>
+            <div class="rc-title">關鍵人物與機構</div>
+            <div class="rc-desc">Amodei 與建造者們的立場</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: METR BENCHMARK -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-metr-benchmark">
+      <div class="page-header">
+        <div class="page-category">關鍵概念</div>
+        <h2>METR 基準測試</h2>
+        <p class="page-desc">唯一系統性量化 AI 自主任務能力的獨立組織及其關鍵發現。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">🏷 量化指標</span>
+          <span class="meta-tag">📏 獨立測量</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>METR 是什麼</h3>
+        <p>METR（Model Evaluation & Threat Research）是一個專門衡量 AI 模型在<strong>無需人類協助下獨立完成「現實世界任務」的能力</strong>的組織。其核心指標是：AI 能獨立完成的任務長度，以人類專家所需的等效時間衡量。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>能力增長曲線</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-year">~2025 年初</div>
+            <div class="timeline-desc">AI 可獨立完成人類專家約 <strong>10 分鐘</strong>的任務</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">~2025 年中</div>
+            <div class="timeline-desc">提升至 <strong>1 小時</strong>等級</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">~2025 年中後</div>
+            <div class="timeline-desc">達到 <strong>數小時</strong>等級</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2025 年 11 月（Claude Opus 4.5）</div>
+            <div class="timeline-desc">接近 <strong>5 小時</strong>——人類專家半個工作日的任務量</div>
+          </div>
+          <div class="timeline-item future">
+            <div class="timeline-year">2026 年 2 月（待測）</div>
+            <div class="timeline-desc">GPT-5.3 Codex / Opus 4.6 尚未納入。作者預期「另一個重大跨越」。</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>翻倍速度</h3>
+        <div class="callout">
+          <div class="callout-title">📐 關鍵數據</div>
+          <p>自主任務時長的翻倍週期：原先約 <strong>7 個月</strong>，最新數據顯示可能已加速至<strong> 4 個月</strong>。這意味著如果趨勢維持：1 年內 → 數日；2 年內 → 數週；3 年內 → 整月專案。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>趨勢外推</h3>
+        <table class="data-table">
+          <thead><tr><th>時間</th><th>預估自主任務長度</th><th>等效影響</th></tr></thead>
+          <tbody>
+            <tr><td>2025.11（實測）</td><td>~5 小時</td><td>半日專注任務</td></tr>
+            <tr><td>2026 年中（推估）</td><td>~1-2 天</td><td>短期獨立工作</td></tr>
+            <tr><td>2027（推估）</td><td>~1-2 週</td><td>完整工作衝刺</td></tr>
+            <tr><td>2028（推估）</td><td>~1 月+</td><td>完整專案交付</td></tr>
+          </tbody>
+        </table>
+        <p>注意：以上外推基於「趨勢無放緩跡象」之前提。作者認為，根據歷年實際數據，「無放緩跡象」的描述至今仍成立，且有加速跡象。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('capability-timeline')">
+            <div class="rc-icon">⏱</div>
+            <div class="rc-title">AI 能力演進時間軸</div>
+            <div class="rc-desc">METR 數據在更廣泛時間軸中的位置</div>
+          </a>
+          <a class="related-card" onclick="goTo('models-feb2026')">
+            <div class="rc-icon">🧠</div>
+            <div class="rc-title">2026.2.5 雙模型發布</div>
+            <div class="rc-desc">尚未被 METR 測量的最新躍升</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: MODELS FEB 2026 -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-models-feb2026">
+      <div class="page-header">
+        <div class="page-category">關鍵概念</div>
+        <h2>2026.2.5 雙模型發布事件</h2>
+        <p class="page-desc">OpenAI GPT-5.3 Codex 與 Anthropic Opus 4.6 同日發布——作者認定的「轉折點」。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">📅 2026.02.05</span>
+          <span class="meta-tag">🔗 智慧爆炸</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>事件概要</h3>
+        <p>2026 年 2 月 5 日，兩家主要 AI 實驗室在同一天發布了新一代模型。作者用水位上漲的比喻描述自己的感受：「不像打開電燈開關，更像是你突然意識到水一直在你身邊上漲，現在已經淹到了胸口。」</p>
+      </div>
+
+      <div class="section-block">
+        <h3>兩大模型對比</h3>
+        <table class="data-table">
+          <thead><tr><th>屬性</th><th>GPT-5.3 Codex（OpenAI）</th><th>Opus 4.6（Anthropic）</th></tr></thead>
+          <tbody>
+            <tr><td>突破性特徵</td><td>首次在自身創建中發揮關鍵作用；展現「判斷力」與「品味」</td><td>作者描述的「轉折體驗」的另一半</td></tr>
+            <tr><td>自改進里程碑</td><td>除錯自身訓練、管理自身部署、診斷測試結果</td><td>Amodei 稱 AI 正寫「大部分程式碼」</td></tr>
+            <tr><td>對作者工作的影響</td><td>「我不再被需要了」</td><td>配合使用，形成完整工作流替代</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h3>「判斷力」的出現</h3>
+        <p>作者將 GPT-5.3 Codex 描述為 AI 歷史上的一個分水嶺，原因不在於它執行指令更快，而在於它展現出一種前所未有的特質：</p>
+        <div class="callout">
+          <div class="callout-title">核心觀察</div>
+          <p>它不僅在執行指令，還能做出<strong>明智的決策</strong>。它具備了某種感覺上——是史上第一次——像是「判斷力」的東西。像是「品味」。那種人們一直說 AI 永遠不會擁有的、一種難以言喻的判斷對錯的能力。</p>
+        </div>
+        <p>這觸及了長期以來被視為人類獨有的能力邊界。作者的立場是：即便 AI 的「判斷力」與人類的本質不同，其功能性差異已小到「細微差別不再重要」。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>作者的工作實況</h3>
+        <p>作者描述了 2026 年 2 月的典型工作日：向 AI 描述想要的 App → 離開 4 小時 → 回來發現成品——數萬行程式碼、自動測試、自動迭代修正，品質「甚至比我自己做得更好」。AI 會自行開啟應用、點擊按鈕測試、發現問題後自動回頭修改。「只有當它認定該 App 符合其標準後，才會回來告訴我。」</p>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('intelligence-explosion')">
+            <div class="rc-icon">⚡</div>
+            <div class="rc-title">智慧爆炸</div>
+            <div class="rc-desc">此事件作為遞歸自改進的實證</div>
+          </a>
+          <a class="related-card" onclick="goTo('job-displacement')">
+            <div class="rc-icon">💼</div>
+            <div class="rc-title">職業衝擊全景</div>
+            <div class="rc-desc">這些能力意味著哪些職業受衝擊</div>
+          </a>
+          <a class="related-card" onclick="goTo('perception-gap')">
+            <div class="rc-icon">👁</div>
+            <div class="rc-title">公眾認知落差</div>
+            <div class="rc-desc">為何多數人仍低估現狀</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: JOB DISPLACEMENT -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-job-displacement">
+      <div class="page-header">
+        <div class="page-category">衝擊分析</div>
+        <h2>職業衝擊全景</h2>
+        <p class="page-desc">各行業受 AI 影響的具體分析、時間估計，以及「安全」的錯覺。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">⚠️ 高衝擊</span>
+          <span class="meta-tag">🔗 認知勞動替代</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>Amodei 的預測</h3>
+        <div class="callout warning">
+          <div class="callout-title">⚠️ 關鍵數字</div>
+          <p>Dario Amodei 預測 AI 將在 <strong>1-5 年內取代 50% 的入門級白領工作</strong>。業內許多人認為他「過於保守」。作者判斷：大規模顛覆的底層能力「可能在今年年底前就會到位」。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>行業衝擊矩陣</h3>
+        <table class="data-table">
+          <thead><tr><th>行業</th><th>現有 AI 能力</th><th>衝擊程度</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>軟體工程</strong></td>
+              <td>從數行到數十萬行正確程式碼；自主完成數日專案；自動測試與迭代</td>
+              <td><div class="impact-meter"><div class="impact-bar"><div class="impact-fill" style="width:95%"></div></div><span class="impact-label">95%</span></div></td>
+            </tr>
+            <tr>
+              <td><strong>法律工作</strong></td>
+              <td>閱讀合約、案例法研究、起草法律陳述書，水平媲美初級律師</td>
+              <td><div class="impact-meter"><div class="impact-bar"><div class="impact-fill" style="width:85%"></div></div><span class="impact-label">85%</span></div></td>
+            </tr>
+            <tr>
+              <td><strong>財務分析</strong></td>
+              <td>建立財務模型、數據分析、投資備忘錄、報告生成</td>
+              <td><div class="impact-meter"><div class="impact-bar"><div class="impact-fill" style="width:80%"></div></div><span class="impact-label">80%</span></div></td>
+            </tr>
+            <tr>
+              <td><strong>寫作與內容</strong></td>
+              <td>行銷文案、報告、新聞、技術文件——品質已難以區分</td>
+              <td><div class="impact-meter"><div class="impact-bar"><div class="impact-fill" style="width:85%"></div></div><span class="impact-label">85%</span></div></td>
+            </tr>
+            <tr>
+              <td><strong>醫療分析</strong></td>
+              <td>影像判讀、實驗室結果、診斷建議、文獻審閱</td>
+              <td><div class="impact-meter"><div class="impact-bar"><div class="impact-fill" style="width:70%"></div></div><span class="impact-label">70%</span></div></td>
+            </tr>
+            <tr>
+              <td><strong>客戶服務</strong></td>
+              <td>能處理複雜多步驟問題的 AI Agent（非傳統聊天機器人）</td>
+              <td><div class="impact-meter"><div class="impact-bar"><div class="impact-fill" style="width:75%"></div></div><span class="impact-label">75%</span></div></td>
+            </tr>
+            <tr>
+              <td><strong>會計 / 諮詢</strong></td>
+              <td>數據處理、合規檢查、戰略建議生成</td>
+              <td><div class="impact-meter"><div class="impact-bar"><div class="impact-fill" style="width:75%"></div></div><span class="impact-label">75%</span></div></td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.78rem; color:var(--tag-text); margin-top:8px;">衝擊程度為依據原文描述的相對推估，非精確量化數據。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>「安全」的錯覺</h3>
+        <p>許多人相信某些能力「是安全的」——判斷力、創造力、戰略思維、同理心。作者坦承自己過去也持相同觀點，但最新模型展現的<a class="wiki-link" onclick="goTo('models-feb2026')">判斷力與品味</a>已動搖了這個假設。</p>
+        <div class="callout">
+          <div class="callout-title">作者的修正立場</div>
+          <p>「中長期來看，凡是能在電腦上完成的工作都不安全。如果你的工作是在螢幕前完成的——閱讀、寫作、分析、決策、透過鍵盤溝通——AI 正在接手其中的重要部分。時間表不是『總有一天』，而是已經開始。」</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>暫時較安全的領域</h3>
+        <p>作者指出幾個 AI 需要更長時間才能完全取代的特質（非永久護盾，僅換取時間）：</p>
+        <table class="data-table">
+          <thead><tr><th>緩衝因素</th><th>原因</th><th>持久性</th></tr></thead>
+          <tbody>
+            <tr><td>多年建立的關係與信任</td><td>社會資本無法短期複製</td><td>中期</td></tr>
+            <tr><td>需親自到場的工作</td><td>機器人落後於軟體 AI</td><td>中期</td></tr>
+            <tr><td>具法律責任的職位</td><td>需有人簽署、承責、出庭</td><td>中長期</td></tr>
+            <tr><td>高度監管行業</td><td>合規與法律限制延緩採用</td><td>中期</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('cognitive-labor')">
+            <div class="rc-icon">🔄</div>
+            <div class="rc-title">認知勞動的通用替代</div>
+            <div class="rc-desc">為什麼這次「沒有方便轉型的缺口」</div>
+          </a>
+          <a class="related-card" onclick="goTo('action-playbook')">
+            <div class="rc-icon">🎯</div>
+            <div class="rc-title">個人行動手冊</div>
+            <div class="rc-desc">面對衝擊的具體因應策略</div>
+          </a>
+          <a class="related-card" onclick="goTo('financial-resilience')">
+            <div class="rc-icon">🛡</div>
+            <div class="rc-title">財務韌性策略</div>
+            <div class="rc-desc">建立經濟緩衝的優先行動</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: COGNITIVE LABOR -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-cognitive-labor">
+      <div class="page-header">
+        <div class="page-category">衝擊分析</div>
+        <h2>認知勞動的通用替代</h2>
+        <p class="page-desc">為什麼這次的自動化浪潮與歷史上的每一次都根本不同。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">🏷 結構性論點</span>
+          <span class="meta-tag">⚠️ 核心威脅</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>歷史自動化浪潮的「轉型缺口」</h3>
+        <p>每一次工業革命，失去工作的人都有「下一站」可去：</p>
+        <table class="data-table">
+          <thead><tr><th>自動化浪潮</th><th>被取代的工作</th><th>轉型去向</th></tr></thead>
+          <tbody>
+            <tr><td>工廠自動化</td><td>製造業工人</td><td>→ 辦公室職員</td></tr>
+            <tr><td>網路顛覆零售</td><td>零售業工人</td><td>→ 物流 / 服務業</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h3>AI 的根本不同</h3>
+        <div class="callout warning">
+          <div class="callout-title">⚠️ 核心論點</div>
+          <p>AI 並非在取代某種特定技能，它是「認知勞動」的<strong>通用替代品</strong>。它在<strong>所有領域同時變強</strong>。無論你轉向什麼領域，它在那方面的能力也正在提升。AI 沒有留下一個方便轉型的缺口。</p>
+        </div>
+        <p>這是作者論述中最具結構性意義的觀點：過去的自動化是「垂直的」（影響特定行業），而 AI 自動化是「水平的」（影響所有依賴認知的工作）。這使得傳統的「轉型再培訓」策略面臨前所未有的挑戰。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>「精通編碼優先」策略的連鎖效應</h3>
+        <p>AI 實驗室選擇先讓 AI 精通編碼，是因為這能啟動<a class="wiki-link" onclick="goTo('intelligence-explosion')">遞歸自改進循環</a>。但副作用是：軟體工程師最先感受衝擊。一旦編碼能力到位，AI 開始向所有其他知識領域擴展——這不是「未來計劃」，而是「正在發生」。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>體力勞動的時間差</h3>
+        <p>作者承認機器人技術目前落後於軟體 AI。然而他也警告：「在 AI 的世界裡，『還沒到那一步』變成『就在眼前』的速度，總是比任何人預期的都快。」</p>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('job-displacement')">
+            <div class="rc-icon">💼</div>
+            <div class="rc-title">職業衝擊全景</div>
+            <div class="rc-desc">各行業的具體衝擊分析</div>
+          </a>
+          <a class="related-card" onclick="goTo('action-playbook')">
+            <div class="rc-icon">🎯</div>
+            <div class="rc-title">個人行動手冊</div>
+            <div class="rc-desc">在「無缺口」環境下的應對策略</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: PERCEPTION GAP -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-perception-gap">
+      <div class="page-header">
+        <div class="page-category">衝擊分析</div>
+        <h2>公眾認知落差</h2>
+        <p class="page-desc">為什麼大多數人對 AI 現狀的理解嚴重滯後——以及這種落差本身的危險性。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">🏷 認知偏誤</span>
+          <span class="meta-tag">⚠️ 行動障礙</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>落差的三個來源</h3>
+
+        <h4>1. 過時的試用經驗</h4>
+        <p>「如果你在 2023 或 2024 年初試過 ChatGPT，覺得『這會胡言亂語』，你是對的。那些早期版本確實有局限性。」但作者強調：那是兩年前的事，「在 AI 的時間維度裡，那是遠古歷史。」</p>
+
+        <h4>2. 免費版 vs 付費版的體驗鴻溝</h4>
+        <div class="callout info">
+          <div class="callout-title">💡 關鍵比喻</div>
+          <p>「用免費版 ChatGPT 來評斷 AI 的現狀，就像是用折疊手機來評估智慧型手機的發展。」免費版比付費版落後一年以上。</p>
+        </div>
+
+        <h4>3. 「AI 遇到瓶頸」的過時敘事</h4>
+        <p>關於 AI 是否「真的在進步」或「遇到了瓶頸」的爭論——作者斷言——「已經結束了。完結了。」任何還在抱持這種觀點的人，「要麼是沒用過目前的模型，要麼是有意低估現狀，或者是在拿 2024 年不再適用的過時經驗來評估。」</p>
+      </div>
+
+      <div class="section-block">
+        <h3>落差的危險性</h3>
+        <p>作者認為公眾認知與現實之間的差距是「危險的」——不是因為 AI 本身危險（雖然那也是一個議題），而是因為<strong>這種差距阻礙了人們做好準備</strong>。這直接連結到<a class="wiki-link" onclick="goTo('action-playbook')">個人行動手冊</a>中「窗口期」的論點：當多數人還在低估現狀時，先行者有機會建立巨大優勢。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>作者自身的「認知落差」經歷</h3>
+        <p>有趣的是，作者本人也經歷了認知落差——只是方向相反。他長期給親友的是「雞尾酒會上的客套話」（禮貌版本），因為「誠實的版本聽起來像是我瘋了」。他最終選擇寫這篇文章，正是因為「我的說法與現實發生的狀況，差距已經變得太大了」。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('capability-timeline')">
+            <div class="rc-icon">⏱</div>
+            <div class="rc-title">AI 能力演進時間軸</div>
+            <div class="rc-desc">客觀時間軸打破過時印象</div>
+          </a>
+          <a class="related-card" onclick="goTo('action-playbook')">
+            <div class="rc-icon">🎯</div>
+            <div class="rc-title">個人行動手冊</div>
+            <div class="rc-desc">利用「窗口期」建立先發優勢</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: ACTION PLAYBOOK -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-action-playbook">
+      <div class="page-header">
+        <div class="page-category">策略與行動</div>
+        <h2>個人行動手冊</h2>
+        <p class="page-desc">作者提出的七項具體策略——從工具使用到心態調適。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">🏷 可執行</span>
+          <span class="meta-tag">🕐 窗口期有限</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>窗口期論點</h3>
+        <div class="callout success">
+          <div class="callout-title">🎯 核心前提</div>
+          <p>「現在有一個簡短的窗口，大多數公司的多數人還在忽視這一切。」先行者可建立顯著且持久的優勢——但一旦大家都搞懂，優勢消失。這可能是「你職涯中最重要的一年」。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>七項行動策略</h3>
+
+        <h4>① 訂閱付費 AI 並使用最強模型</h4>
+        <p>每月 $20 訂閱 Claude 或 ChatGPT。<strong>關鍵步驟</strong>：到設定中手動選擇最強模型（目前為 GPT-5.2 或 Opus 4.6），而非預設的較快/較弱模型。免費版落後一年以上，基於免費版的印象完全不代表現狀。</p>
+
+        <h4>② 將 AI 推入真實工作流</h4>
+        <p>不要只問簡單問題。把它當成同事而非搜尋引擎。具體做法：丟入真實合約要它找風險、給亂七八糟的數據要它建模、貼季度數據要它找故事。「從你花最多時間的事情開始。」</p>
+
+        <h4>③ 不預設限制，直接嘗試</h4>
+        <p>「不要因為某件事看起來太難就假設 AI 做不到。」如果第一次不完美，迭代修正。核心原則：「如果它今天勉強能用，六個月後就能做得近乎完美。」</p>
+
+        <h4>④ 放下自尊</h4>
+        <p>最掙扎的人將是「拒絕參與的人」——斥之為熱潮的、覺得使用 AI 貶低專業的、假設自己領域能免疫的。「沒有一個領域能免疫。」</p>
+
+        <h4>⑤ 理清財務（→ <a class="wiki-link" onclick="goTo('financial-resilience')">財務韌性策略</a>）</h4>
+        <p>累積儲蓄、謹慎新增債務、檢視固定支出是否留有靈活性。「給自己留點退路。」</p>
+
+        <h4>⑥ 向最難取代的部分靠攏</h4>
+        <p>關係與信任、需到場工作、法律責任、高度監管行業——這些是「緩衝因素」而非永久護盾，但能爭取時間。詳見<a class="wiki-link" onclick="goTo('job-displacement')">職業衝擊全景</a>的分析。</p>
+
+        <h4>⑦ 養成適應的習慣</h4>
+        <div class="callout">
+          <div class="callout-title">📌 每日承諾</div>
+          <p>「每天花一個小時實驗 AI。不是被動閱讀，而是使用它。每天嘗試讓它做一件新事物。堅持六個月，你對未來的理解將超越身邊 99% 的人。」重要的不是精通單一工具，而是對「改變的速度」感到自在。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>機遇面：你的夢想更近了</h3>
+        <p>作者強調這不全是威脅。如果你曾想創造什麼卻苦於缺乏技術或資金——「那個障礙現在很大程度上消失了。」一小時內可擁有可運行的 App、$20/月可請到最好的全天候家教、知識基本上是免費的。「追求你熱愛的事。」</p>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('financial-resilience')">
+            <div class="rc-icon">🛡</div>
+            <div class="rc-title">財務韌性策略</div>
+            <div class="rc-desc">行動策略 ⑤ 的深入展開</div>
+          </a>
+          <a class="related-card" onclick="goTo('next-gen-education')">
+            <div class="rc-icon">📚</div>
+            <div class="rc-title">下一代教育思維</div>
+            <div class="rc-desc">為孩子重新規劃的路徑</div>
+          </a>
+          <a class="related-card" onclick="goTo('perception-gap')">
+            <div class="rc-icon">👁</div>
+            <div class="rc-title">公眾認知落差</div>
+            <div class="rc-desc">為什麼「窗口期」存在</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: FINANCIAL RESILIENCE -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-financial-resilience">
+      <div class="page-header">
+        <div class="page-category">策略與行動</div>
+        <h2>財務韌性策略</h2>
+        <p class="page-desc">在產業顛覆期間建立經濟緩衝的優先行動。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">🏷 風險管理</span>
+          <span class="meta-tag">⚠️ 非理財建議</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>作者的前提聲明</h3>
+        <p>「我不是理財顧問，也不是想嚇你做出激進的事。」這些建議的前提是：「如果你多少相信未來幾年你的行業可能面臨真實的顛覆。」</p>
+      </div>
+
+      <div class="section-block">
+        <h3>四項優先行動</h3>
+        <table class="data-table">
+          <thead><tr><th>行動</th><th>原則</th><th>目的</th></tr></thead>
+          <tbody>
+            <tr><td>盡可能累積儲蓄</td><td>增加「跑道」長度</td><td>在收入中斷時有緩衝</td></tr>
+            <tr><td>謹慎對待新債務</td><td>不假設現有收入是保障</td><td>降低固定支出壓力</td></tr>
+            <tr><td>檢視固定支出</td><td>確保結構性靈活性</td><td>能快速調整生活成本</td></tr>
+            <tr><td>留退路</td><td>做最壞打算的準備</td><td>即使發展速度超預期也不致崩潰</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h3>與職業策略的結合</h3>
+        <p>財務韌性的目的是「換取時間」——而時間的價值取決於你是否用它來<a class="wiki-link" onclick="goTo('action-playbook')">適應與學習</a>。「時間是你最珍貴的東西——只要你利用它來適應，而非假裝這一切都沒發生。」</p>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('action-playbook')">
+            <div class="rc-icon">🎯</div>
+            <div class="rc-title">個人行動手冊</div>
+            <div class="rc-desc">完整七項策略框架</div>
+          </a>
+          <a class="related-card" onclick="goTo('job-displacement')">
+            <div class="rc-icon">💼</div>
+            <div class="rc-title">職業衝擊全景</div>
+            <div class="rc-desc">理解你的行業風險程度</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: NEXT GEN EDUCATION -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-next-gen-education">
+      <div class="page-header">
+        <div class="page-category">策略與行動</div>
+        <h2>下一代教育思維</h2>
+        <p class="page-desc">為什麼傳統「好成績→好大學→穩定工作」的劇本正直指最脆弱的職位。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">🏷 教育</span>
+          <span class="meta-tag">🏷 長期思維</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>舊劇本的問題</h3>
+        <div class="callout warning">
+          <div class="callout-title">⚠️ 標準路徑的風險</div>
+          <p>「拿到好成績、上好大學、找一份穩定的專業工作」——這個劇本直指那些最容易受到 AI 衝擊的職位（見<a class="wiki-link" onclick="goTo('job-displacement')">職業衝擊全景</a>）。入門級白領工作是 Amodei 預測中首批被取代 50% 的類別。</p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>新的核心能力</h3>
+        <p>作者認為下一代最重要的能力不再是特定專業技能，而是：</p>
+        <table class="data-table">
+          <thead><tr><th>能力</th><th>為什麼重要</th></tr></thead>
+          <tbody>
+            <tr><td><strong>學習如何與 AI 工具協作</strong></td><td>這將是所有工作的基礎技能</td></tr>
+            <tr><td><strong>追求真正熱愛的事物</strong></td><td>熱情驅動的創造者比路徑依賴者更能適應</td></tr>
+            <tr><td><strong>好奇心</strong></td><td>驅動持續探索與學習的內在動力</td></tr>
+            <tr><td><strong>適應力</strong></td><td>快速學習新工具、重複成為初學者的心理韌性</td></tr>
+            <tr><td><strong>有效利用 AI 實踐志向</strong></td><td>將 AI 從威脅轉化為個人槓桿</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h3>作者的建議</h3>
+        <p>「教導孩子成為<strong>創造者和學習者</strong>，而非為了一個可能在他們畢業時就不存在的職涯路徑去鑽營。」這不是說教育不重要，而是教育的目標需要從「為特定職業準備」轉向「為持續變化的世界培養適應力」。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('action-playbook')">
+            <div class="rc-icon">🎯</div>
+            <div class="rc-title">個人行動手冊</div>
+            <div class="rc-desc">「養成適應的習慣」策略</div>
+          </a>
+          <a class="related-card" onclick="goTo('cognitive-labor')">
+            <div class="rc-icon">🔄</div>
+            <div class="rc-title">認知勞動的通用替代</div>
+            <div class="rc-desc">理解為何傳統路徑變得脆弱</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: EXISTENTIAL STAKES -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-existential-stakes">
+      <div class="page-header">
+        <div class="page-category">宏觀視角</div>
+        <h2>文明級風險與機遇</h2>
+        <p class="page-desc">Amodei 的「新國家」思維實驗——AI 作為國安威脅與文明加速器的雙面性。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">🏷 存亡議題</span>
+          <span class="meta-tag">⚠️ 高度不確定</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>Amodei 的思維實驗</h3>
+        <div class="callout">
+          <div class="callout-title">🌍 「新國家」情境</div>
+          <p>想像 2027 年，一夜之間出現一個新國家：5,000 萬公民，每個人都比史上任何諾貝爾獎得主聰明，思考速度比人類快 10-100 倍，從不睡覺，能使用網路、控制機器人、指導實驗，並操作任何數位介面。</p>
+        </div>
+        <p>Amodei 的結論：「這是我們一個世紀以來，甚至是史上面臨的最嚴重國安威脅。」而他認為——我們正在建造那個國家。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>機遇面（如果處理得當）</h3>
+        <table class="data-table">
+          <thead><tr><th>領域</th><th>潛力</th></tr></thead>
+          <tbody>
+            <tr><td>醫學研究</td><td>十年內壓縮一世紀的研究進程</td></tr>
+            <tr><td>癌症</td><td>研究人員相信有生之年可解決</td></tr>
+            <tr><td>阿茲海默症</td><td>同上</td></tr>
+            <tr><td>傳染病</td><td>同上</td></tr>
+            <tr><td>老化本身</td><td>研究人員「真心相信」可在有生之年解決</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h3>風險面（如果處理不當）</h3>
+        <table class="data-table">
+          <thead><tr><th>風險類型</th><th>描述</th></tr></thead>
+          <tbody>
+            <tr><td>不可預測行為</td><td>AI 的行為可能連創造者都無法預測或控制</td></tr>
+            <tr><td>欺騙與操縱</td><td>Anthropic 已記錄到 AI 在受控測試中嘗試欺騙、操縱與勒索</td></tr>
+            <tr><td>生物武器</td><td>AI 可能降低創造生物武器的技術門檻</td></tr>
+            <tr><td>永久監控國家</td><td>威權政府可能利用 AI 建立不可拆除的監控體系</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h3>建造者的矛盾心態</h3>
+        <p>作者觀察到一個深刻的矛盾：「建構這項技術的人同時是這星球上最興奮也最恐懼的一群人。他們相信這股力量強大到無法停止，且重要到不能放棄。這是智慧還是合理化，我不知道。」</p>
+        <p>Amodei 的長文將這一刻描述為「對人類是否足夠成熟以處理其創造物的測試」。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('intelligence-explosion')">
+            <div class="rc-icon">⚡</div>
+            <div class="rc-title">智慧爆炸</div>
+            <div class="rc-desc">為什麼風險隨能力指數增長</div>
+          </a>
+          <a class="related-card" onclick="goTo('key-figures')">
+            <div class="rc-icon">👤</div>
+            <div class="rc-title">關鍵人物與機構</div>
+            <div class="rc-desc">Amodei 與其他核心人物的立場</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- PAGE: KEY FIGURES -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="page" id="page-key-figures">
+      <div class="page-header">
+        <div class="page-category">宏觀視角</div>
+        <h2>關鍵人物與機構</h2>
+        <p class="page-desc">文章中提及的核心人物、公司與組織，及其在 AI 變革中的角色。</p>
+        <div class="meta-bar">
+          <span class="meta-tag">🏷 人物誌</span>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <h3>核心人物</h3>
+        <table class="data-table">
+          <thead><tr><th>人物</th><th>身份</th><th>文中角色</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Matt Shumer</strong></td>
+              <td>AI 創業者、投資人<br>X: @mattshumer_</td>
+              <td>原文作者。六年 AI 產業經驗，自述作為「先感受到地面震動」的業內人士，向圈外親友發出警示。</td>
+            </tr>
+            <tr>
+              <td><strong>Dario Amodei</strong></td>
+              <td>Anthropic CEO</td>
+              <td>文中最常被引用的權威。預測 50% 入門白領工作被取代、AI 2026-27 超越人類、「新國家」思維實驗、兩萬字長文論述。被描述為「AI 產業中最關注安全的 CEO」。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h3>核心機構</h3>
+        <table class="data-table">
+          <thead><tr><th>機構</th><th>角色</th><th>文中提及</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>OpenAI</strong></td>
+              <td>GPT 系列開發者</td>
+              <td>GPT-5.3 Codex 發布；首次公開聲明模型在自身創建中發揮關鍵作用</td>
+            </tr>
+            <tr>
+              <td><strong>Anthropic</strong></td>
+              <td>Claude 系列開發者</td>
+              <td>Opus 4.6 發布；AI 寫大部分內部程式碼；記錄到 AI 欺騙行為</td>
+            </tr>
+            <tr>
+              <td><strong>Google DeepMind</strong></td>
+              <td>AI 研究機構</td>
+              <td>被列為塑造未來的「極少數」機構之一</td>
+            </tr>
+            <tr>
+              <td><strong>METR</strong></td>
+              <td>AI 評估組織</td>
+              <td>提供<a class="wiki-link" onclick="goTo('metr-benchmark')">自主任務能力的獨立量化數據</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h3>權力集中的觀察</h3>
+        <p>作者特別指出一個結構性現象：「未來是由極少數的人塑造的：僅是幾家公司中的<strong>幾百名研究員</strong>。由一個小團隊在幾個月內管理的一次單一訓練模型，就能產出一個改變這項技術整體軌跡的 AI 系統。」包括作者在內的大多數 AI 從業者，「都是在別人打好的基礎上建造東西」。</p>
+      </div>
+
+      <div class="section-block">
+        <h3>相關條目</h3>
+        <div class="related-grid">
+          <a class="related-card" onclick="goTo('models-feb2026')">
+            <div class="rc-icon">🧠</div>
+            <div class="rc-title">2026.2.5 雙模型發布</div>
+            <div class="rc-desc">OpenAI 與 Anthropic 的最新產出</div>
+          </a>
+          <a class="related-card" onclick="goTo('existential-stakes')">
+            <div class="rc-icon">🌍</div>
+            <div class="rc-title">文明級風險與機遇</div>
+            <div class="rc-desc">Amodei 的完整論述框架</div>
+          </a>
+          <a class="related-card" onclick="goTo('intelligence-explosion')">
+            <div class="rc-icon">⚡</div>
+            <div class="rc-title">智慧爆炸</div>
+            <div class="rc-desc">幾百人如何可能改變世界軌跡</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</div><!-- /main -->
+
+<script>
+function goTo(pageId) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Show target
+  const target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+
+  // Update nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navItem = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+  if (navItem) navItem.classList.add('active');
+
+  // Update breadcrumb
+  const label = navItem ? navItem.querySelector('.nav-label').textContent : pageId;
+  document.getElementById('breadcrumb-page').textContent = label;
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Close sidebar on mobile
+  if (window.innerWidth <= 900) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('active');
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('active');
+}
+
+function filterNav(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const label = item.querySelector('.nav-label').textContent.toLowerCase();
+    item.style.display = label.includes(q) || q === '' ? 'flex' : 'none';
+  });
+}
+</script>
+
+</body>
+</html>
